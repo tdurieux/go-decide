@@ -1,0 +1,30 @@
+html, body {
+	margin: auto;
+	width: 1240px;
+	background: #F3F3F3;
+}
+table {
+	background: #FFFFFF;
+}
+.pure-table td {
+    background-color: transparent;
+}
+.pure-table-odd td {
+    background-color: #f2f2f2;
+}
+.executions {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	}
+	.execution {
+		padding: 7px;
+		background: #FFFFFF;
+		margin: 4px;
+		border-radius: 3px; 
+		}
+		h3, h2 {
+			margin: 2px;
+			padding: 0;
+			}
+
