@@ -63,6 +63,9 @@ func (d *Decide) Decide(input INPUT) error {
 	if input.NumPoints < 2 || input.NumPoints > 100 {
 		return errors.New("Invalid NumPoints value.")
 	}
+	if (len(input.Points) != input.NumPoints) {
+		return errors.New("Invalid NumPoints value different from the actual number of points.")
+	}
 	d.input = input
 
 	err := d.performCMV()
@@ -145,7 +148,10 @@ func (d *Decide) performCMV() error {
 	return nil
 }
 
+// There exists at least one set of two consecutive data points
+// that are a distance greater than the length, LENGTH1, apart.
 func (d Decide) Rule0() (bool, error)  {
+	// (0 ≤ LENGTH1)
 	if d.input.Parameters.LENGTH1 < 0 {
 		return false, errors.New("Invalid length1")
 	}
@@ -161,7 +167,10 @@ func (d Decide) Rule0() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of three consecutive data points
+// that cannot all be contained within or on a circle of radius RADIUS1.
 func (d Decide) Rule1() (bool, error)  {
+	// (0 ≤ RADIUS1)
 	if d.input.Parameters.RADIUS1 < 0 {
 		return false, errors.New("Invalid RADIUS1")
 	}
@@ -187,29 +196,38 @@ func (d Decide) Rule1() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of three consecutive data points which
+// form an angle such that:  angle < (PI−EPSILON)  or angle > (PI+EPSILON)
+// The second of the three consecutive points is always the vertex of the angle.
+// If either the first point or the last point (or both) coincides with the vertex,
+// the angle is undefined and the LIC is not satisfied by those three points
 func (d Decide) Rule2() (bool, error)  {
+	// (0 ≤ EPSILON < PI)
 	if d.input.Parameters.EPSILON < 0 || d.input.Parameters.EPSILON >= math.Pi {
 		return false, errors.New("Invalid EPSILON")
 	}
-	for i, p1 := range d.input.Points {
+	for i, a := range d.input.Points {
 		if (i >= d.input.NumPoints - 2) {
 			break;
 		}
-		p2 := d.input.Points[i + 1]
-		p3 := d.input.Points[i + 2]
+		b := d.input.Points[i + 1]
+		c := d.input.Points[i + 2]
 
-		dp1p2 := computeDistancePointToPoint(p1, p2)
-		dp2p3 := computeDistancePointToPoint(p2, p3)
-		dp1p3 := computeDistancePointToPoint(p1, p3)
+		// http://stackoverflow.com/questions/3486172/angle-between-3-points
+		ab := [2]float64{b[0] - a[0], b[1] - a[1]}
+		cb := [2]float64{b[0] - c[0], b[1] - c[1]}
+
+		dot := (ab[0] * cb[0] + ab[1] * cb[1])
+		cross := (ab[0] * cb[1] - ab[1] * cb[0])
+
+		angle := math.Atan2(cross, dot)
 
 		// If either the first point or the last point (or both)
 		// coincides with the vertex, the angle is undefined and
 		// the LIC is not satisfied by those three points
-		if dp1p2 == 0 || dp2p3 == 0 {
+		if a == b || b == c {
 			return false, nil
 		}
-
-		angle := math.Acos((math.Pow(dp1p2, 2) + math.Pow(dp2p3, 2) - math.Pow(dp1p3, 2)) / (2 * dp1p2 * dp2p3));
 		if (angle < math.Pi - d.input.Parameters.EPSILON || angle > math.Pi + d.input.Parameters.EPSILON) {
 			return true, nil
 		}
@@ -217,7 +235,10 @@ func (d Decide) Rule2() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of three consecutive data points
+// that are the vertices of a triangle with area greater than AREA1
 func (d Decide) Rule3() (bool, error)  {
+	// (0 ≤ AREA1)
 	if d.input.Parameters.AREA1 < 0 {
 		return false, errors.New("Invalid AREA1")
 	}
@@ -228,8 +249,7 @@ func (d Decide) Rule3() (bool, error)  {
 		p2 := d.input.Points[i + 1]
 		p3 := d.input.Points[i + 2]
 
-		area := math.Abs(((p1[0] - p3[0]) * (p2[1] - p1[1]) - (p1[0] - p2[0]) * (p3[1] - p1[1]))/2)
-		area = math.Abs(p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1]))/2
+		area := math.Abs(p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1]))/2
 		if area > d.input.Parameters.AREA1 {
 			return true, nil
 		}
@@ -238,34 +258,45 @@ func (d Decide) Rule3() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of Q PTS consecutive data points
+// that lie in more than QUADS quadrants.
+// Where there is ambiguity as to which quadrant contains a given point, priority
+// of decision will be by quadrant number, i.e., I, II, III, IV.
+// For example, the data point (0,0) is in quadrant I, the point (-l,0) is in quadrant II,
+// the point (0,-l) is in quadrant III, the point  (0,1) is in quadrant I and the point (1,0) is in quadrant I.
 func (d Decide) Rule4() (bool, error)  {
+	// (2 ≤ Q PTS ≤ NUMPOINTS)
+	if d.input.Parameters.Q_PTS < 2 || d.input.Parameters.Q_PTS > d.input.NumPoints {
+		return false, errors.New("Invalid Q_PTS")
+	}
+	// (1 ≤ QUADS ≤ 3)
+	if d.input.Parameters.QUADS < 1 || d.input.Parameters.QUADS > 3 {
+		return false, errors.New("Invalid QUADS")
+	}
 	for i, _ := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.Q_PTS) {
+		if (i > d.input.NumPoints - d.input.Parameters.Q_PTS) {
 			break;
 		}
-		lieCounter := 0
-		currentQuad := 1
+		usedQuadrants := make([]bool, 4)
 		for ndx := i; ndx < (i + d.input.Parameters.Q_PTS); ndx++ {
-			if (getQuadranNumber(d.input.Points[ndx]) != currentQuad) {
-				lieCounter++;
-				if (lieCounter > d.input.Parameters.QUADS) {
+			usedQuadrants[getQuadranNumber(d.input.Points[ndx])] = true
+		}
+		countUsed := 0
+		for _, v := range usedQuadrants {
+			if (v) {
+				countUsed++;
+				// lie in more than QUADS quadrants
+				if (countUsed > d.input.Parameters.QUADS) {
 					return true, nil
 				}
 			}
-
-			currentQuad++;
-			if (currentQuad > 4) {
-				currentQuad = 1;
-			}
-		}
-
-		if (lieCounter > 3) {
-			break;
 		}
 	}
 	return false, nil
 }
 
+// There exists at least one set of two consecutive data points,
+// (X[i],Y[i]) and (X[j],Y[j]), such that X[j] - X[i] < 0. (where i = j-1)
 func (d Decide) Rule5() (bool, error)  {
 	for i, p1 := range d.input.Points {
 		if (i >= d.input.NumPoints - 1) {
@@ -281,9 +312,25 @@ func (d Decide) Rule5() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of N PTS consecutive data points such
+// that at least one of the points lies a distance greater than DIST
+// from the line joining the first and last of these N PTS points.
+// If the first and last points of these N PTS are identical,
+// then the calculated distance to compare with DIST will be the distance
+// from the coincident point to all other points of the N PTS consecutive points.
+// The condition is not met when NUMPOINTS < 3.
 func (d Decide) Rule6() (bool, error)  {
+	// The condition is not met when NUMPOINTS < 3.
 	if d.input.NumPoints < 3 {
 		return false, nil
+	}
+	// (3 ≤ N PTS ≤ NUMPOINTS)
+	if d.input.Parameters.N_PTS < 3 || d.input.Parameters.N_PTS > d.input.NumPoints {
+		return false, errors.New("Invalid N_PTS.")
+	}
+	// (0 ≤ DIST)
+	if d.input.Parameters.DIST < 0 {
+		return false, errors.New("Invalid DIST.")
 	}
 	for i, p1 := range d.input.Points {
 		if (i >= d.input.NumPoints - d.input.Parameters.N_PTS) {
@@ -309,15 +356,23 @@ func (d Decide) Rule6() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of two data points separated by exactly K PTS consecutive intervening
+// points that are a distance greater than the length, LENGTH1, apart.
+// The condition is not met when NUMPOINTS < 3.
 func (d Decide) Rule7() (bool, error)  {
+	// The condition is not met when NUMPOINTS < 3.
 	if d.input.NumPoints < 3 {
 		return false, nil
+	}
+	// 1 ≤ K PTS ≤ (NUMPOINTS−2)
+	if d.input.Parameters.K_PTS < 1 || d.input.Parameters.K_PTS > d.input.NumPoints - 2 {
+		return false, errors.New("Invalid K_PTS.")
 	}
 	for i, p1 := range d.input.Points {
 		if (i >= d.input.NumPoints - d.input.Parameters.K_PTS) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.K_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.K_PTS + 1]
 		if computeDistancePointToPoint(p1, p2) > d.input.Parameters.LENGTH1 {
 			return true, nil
 		}
@@ -325,12 +380,25 @@ func (d Decide) Rule7() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of three data points separated by exactly A PTS and B PTS
+// consecutive intervening points, respectively, that cannot be contained within or on a circle of
+// radius RADIUS1. The condition is not met when NUMPOINTS < 5.
 func (d Decide) Rule8() (bool, error)  {
+	// The condition is not met when NUMPOINTS < 5.
 	if d.input.NumPoints < 5 {
 		return false, nil
 	}
+	// A PTS+B PTS ≤ (NUMPOINTS−3)
 	if d.input.Parameters.A_PTS + d.input.Parameters.B_PTS > d.input.NumPoints - 3 {
-		return false, nil
+		return false, errors.New("Invalid A_PTS, B_PTS.")
+	}
+	// 1 ≤ A PTS
+	if d.input.Parameters.A_PTS < 1 {
+		return false, errors.New("Invalid A_PTS.")
+	}
+	// 1 ≤ B PTS
+	if d.input.Parameters.B_PTS < 1 {
+		return false, errors.New("Invalid B_PTS.")
 	}
 	for i, p1 := range d.input.Points {
 		if (i >= d.input.NumPoints - d.input.Parameters.A_PTS - d.input.Parameters.B_PTS) {
@@ -358,31 +426,40 @@ func (d Decide) Rule9() (bool, error)  {
 	if d.input.NumPoints < 5 {
 		return false, nil
 	}
+	if d.input.Parameters.C_PTS < 1 {
+		return false, errors.New("Invalid C_PTS.")
+	}
+	if d.input.Parameters.D_PTS < 1 {
+		return false, errors.New("Invalid D_PTS.")
+	}
 	if d.input.Parameters.C_PTS + d.input.Parameters.D_PTS > d.input.NumPoints - 3 {
 		return false, nil
 	}
 	if d.input.Parameters.EPSILON < 0 || d.input.Parameters.EPSILON >= math.Pi {
 		return false, errors.New("Invalid EPSILON")
 	}
-	for i, p1 := range d.input.Points {
+	for i, a := range d.input.Points {
 		if (i >= d.input.NumPoints - d.input.Parameters.C_PTS - d.input.Parameters.D_PTS) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.C_PTS]
-		p3 := d.input.Points[i + d.input.Parameters.C_PTS + d.input.Parameters.D_PTS]
+		b := d.input.Points[i + d.input.Parameters.C_PTS]
+		c := d.input.Points[i + d.input.Parameters.C_PTS + d.input.Parameters.D_PTS]
 
-		dp1p2 := computeDistancePointToPoint(p1, p2)
-		dp2p3 := computeDistancePointToPoint(p2, p3)
-		dp1p3 := computeDistancePointToPoint(p1, p3)
+		// http://stackoverflow.com/questions/3486172/angle-between-3-points
+		ab := [2]float64{b[0] - a[0], b[1] - a[1]}
+		cb := [2]float64{b[0] - c[0], b[1] - c[1]}
+
+		dot := (ab[0] * cb[0] + ab[1] * cb[1])
+		cross := (ab[0] * cb[1] - ab[1] * cb[0])
+
+		angle := math.Atan2(cross, dot)
 
 		// If either the first point or the last point (or both)
 		// coincides with the vertex, the angle is undefined and
 		// the LIC is not satisfied by those three points
-		if dp1p2 == 0 || dp2p3 == 0 {
-			continue
+		if a == b || b == c {
+			return false, nil
 		}
-
-		angle := math.Acos((math.Pow(dp1p2, 2) + math.Pow(dp2p3, 2) - math.Pow(dp1p3, 2)) / (2 * dp1p2 * dp2p3));
 		if (angle < math.Pi - d.input.Parameters.EPSILON || angle > math.Pi + d.input.Parameters.EPSILON) {
 			return true, nil
 		}
@@ -391,6 +468,12 @@ func (d Decide) Rule9() (bool, error)  {
 }
 
 func (d Decide) Rule10() (bool, error)  {
+	if d.input.Parameters.E_PTS < 1 {
+		return false, errors.New("Invalid E_PTS.")
+	}
+	if d.input.Parameters.F_PTS < 1 {
+		return false, errors.New("Invalid F_PTS.")
+	}
 	if d.input.Parameters.AREA1 < 0 {
 		return false, errors.New("Invalid AREA1")
 	}
@@ -413,6 +496,9 @@ func (d Decide) Rule10() (bool, error)  {
 func (d Decide) Rule11() (bool, error)  {
 	if d.input.NumPoints < 3 {
 		return false, nil
+	}
+	if d.input.Parameters.K_PTS < 1 {
+		return false, errors.New("Invalid K_PTS.")
 	}
 	if d.input.Parameters.LENGTH2 < 0 {
 		return false, errors.New("Invalid LENGTH2")
@@ -443,6 +529,9 @@ func (d Decide) Rule11() (bool, error)  {
 }
 
 func (d Decide) Rule12() (bool, error)  {
+	if d.input.Parameters.K_PTS < 1 {
+		return false, errors.New("Invalid K_PTS.")
+	}
 	cond1 := false
 	cond2 := false
 	for i, p1 := range d.input.Points {
@@ -465,6 +554,12 @@ func (d Decide) Rule12() (bool, error)  {
 }
 
 func (d Decide) Rule13() (bool, error)  {
+	if d.input.Parameters.A_PTS < 1 {
+		return false, errors.New("Invalid A_PTS.")
+	}
+	if d.input.Parameters.B_PTS < 1 {
+		return false, errors.New("Invalid B_PTS.")
+	}
 	cond1 := false
 	cond2 := false
 	for i, p1 := range d.input.Points {
@@ -498,6 +593,12 @@ func (d Decide) Rule13() (bool, error)  {
 }
 
 func (d Decide) Rule14() (bool, error)  {
+	if d.input.Parameters.E_PTS < 1 {
+		return false, errors.New("Invalid E_PTS.")
+	}
+	if d.input.Parameters.F_PTS < 1 {
+		return false, errors.New("Invalid F_PTS.")
+	}
 	cond1 := false
 	cond2 := false
 	for i, p1 := range d.input.Points {
@@ -555,13 +656,13 @@ func getQuadranNumber(p [2]float64) int {
 	y := p[1]
 
 	if (x >= 0 && y >= 0) {
-		return 1;
+		return 0;
 	}
 	if (x < 0 && y >= 0) {
-		return 2;
+		return 1;
 	}
 	if (x < 0 && y < 0) {
-		return 3;
+		return 2;
 	}
-	return 4;
+	return 3;
 }
