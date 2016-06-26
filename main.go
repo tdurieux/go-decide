@@ -59,7 +59,7 @@ func main() {
 	flag.Parse()
 
 	if *filePath == "" {
-		fmt.Errorf("Invalid file path")
+		flag.Usage()
 		return
 	}
 	f, err := os.Open(*filePath)
@@ -90,5 +90,4 @@ func main() {
 		decide := execute(*filePath, *outputPath)
 		fmt.Println(decide.Launch)
 	}
-
 }
