@@ -87,7 +87,8 @@ func main() {
 			}
 		}
 	case mode.IsRegular():
-		execute(*filePath, *outputPath)
+		decide := execute(*filePath, *outputPath)
+		fmt.Println(decide.Launch)
 	}
 
 }

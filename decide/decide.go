@@ -372,7 +372,7 @@ func (d Decide) Rule7() (bool, error)  {
 		if (i >= d.input.NumPoints - d.input.Parameters.K_PTS) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.K_PTS + 1]
+		p2 := d.input.Points[i + d.input.Parameters.K_PTS]
 		if computeDistancePointToPoint(p1, p2) > d.input.Parameters.LENGTH1 {
 			return true, nil
 		}

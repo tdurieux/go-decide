@@ -1,4 +1,4 @@
-package website
+package main
 
 import (
 	"log"
