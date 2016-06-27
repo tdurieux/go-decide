@@ -12,19 +12,15 @@ table {
 .pure-table-odd td {
     background-color: #f2f2f2;
 }
-.executions {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	}
-	.execution {
-		padding: 7px;
-		background: #FFFFFF;
-		margin: 4px;
-		border-radius: 3px; 
-		}
-		h3, h2 {
-			margin: 2px;
-			padding: 0;
-			}
+td.yes, td.no {
+	text-align: center;
+	width: 30px;
+	height: 30px;
+}
+td.yes {
+	background: green;
+}
 
+td.no {
+	background: red;
+}
