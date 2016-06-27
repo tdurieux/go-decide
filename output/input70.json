@@ -15,7 +15,7 @@
     true,
     true,
     false,
-    true
+    false
   ],
   "PUM": [
     [
@@ -67,7 +67,7 @@
       true,
       true,
       false,
-      true
+      false
     ],
     [
       true,
@@ -169,7 +169,7 @@
       false,
       true,
       true,
-      true
+      false
     ],
     [
       true,
@@ -186,7 +186,7 @@
       true,
       true,
       true,
-      true
+      false
     ],
     [
       true,
@@ -203,7 +203,7 @@
       true,
       true,
       false,
-      true
+      false
     ],
     [
       true,
@@ -254,24 +254,24 @@
       true,
       true,
       true,
-      true
+      false
     ],
     [
       true,
       true,
+      false,
       true,
       true,
       true,
       true,
       true,
+      false,
+      false,
+      false,
       true,
       true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
+      false,
+      false
     ]
   ],
   "FUV": [
@@ -289,6 +289,6 @@
     true,
     true,
     true,
-    true
+    false
   ]
 }

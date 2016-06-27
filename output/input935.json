@@ -1,5 +1,5 @@
 {
-  "LAUNCH": "YES",
+  "LAUNCH": "NO",
   "CMV": [
     true,
     true,
@@ -15,7 +15,7 @@
     true,
     true,
     true,
-    true
+    false
   ],
   "PUM": [
     [
@@ -33,7 +33,7 @@
       true,
       true,
       true,
-      true
+      false
     ],
     [
       true,
@@ -135,7 +135,75 @@
       true,
       true,
       true,
+      false
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
       true
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
     ],
     [
       true,
@@ -189,85 +257,17 @@
       true
     ],
     [
+      false,
       true,
       true,
       true,
       true,
       true,
+      false,
       true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    ],
-    [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    ],
-    [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    ],
-    [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    ],
-    [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
+      false,
+      false,
+      false,
       true,
       true,
       true,
@@ -275,6 +275,7 @@
     ]
   ],
   "FUV": [
+    false,
     true,
     true,
     true,
@@ -284,11 +285,10 @@
     true,
     true,
     true,
+    false,
     true,
     true,
     true,
-    true,
-    true,
-    true
+    false
   ]
 }

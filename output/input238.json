@@ -1,5 +1,5 @@
 {
-  "LAUNCH": "YES",
+  "LAUNCH": "NO",
   "CMV": [
     true,
     true,
@@ -14,8 +14,8 @@
     true,
     true,
     true,
-    true,
-    true
+    false,
+    false
   ],
   "PUM": [
     [
@@ -49,7 +49,7 @@
       true,
       true,
       true,
-      true,
+      false,
       true
     ],
     [
@@ -100,7 +100,7 @@
       true,
       true,
       true,
-      true,
+      false,
       true
     ],
     [
@@ -134,8 +134,25 @@
       true,
       true,
       true,
-      true,
+      false,
       true
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false
     ],
     [
       true,
@@ -169,6 +186,23 @@
       true,
       true,
       true,
+      false
+    ],
+    [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
       true
     ],
     [
@@ -186,7 +220,7 @@
       true,
       true,
       true,
-      true
+      false
     ],
     [
       true,
@@ -202,7 +236,24 @@
       true,
       true,
       true,
+      false,
+      true
+    ],
+    [
       true,
+      false,
+      true,
+      true,
+      false,
+      true,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      false,
+      false,
       true
     ],
     [
@@ -213,62 +264,11 @@
       true,
       true,
       true,
+      false,
       true,
+      false,
       true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    ],
-    [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    ],
-    [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true
-    ],
-    [
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
-      true,
+      false,
       true,
       true,
       true
@@ -279,16 +279,16 @@
     true,
     true,
     true,
+    false,
+    true,
+    false,
+    false,
     true,
     true,
     true,
     true,
     true,
     true,
-    true,
-    true,
-    true,
-    true,
-    true
+    false
   ]
 }

@@ -1,5 +1,5 @@
 {
-  "LAUNCH": "YES",
+  "LAUNCH": "NO",
   "CMV": [
     true,
     true,
@@ -15,7 +15,7 @@
     true,
     true,
     true,
-    true
+    false
   ],
   "PUM": [
     [
@@ -237,7 +237,7 @@
       true,
       true,
       true,
-      true
+      false
     ],
     [
       true,
@@ -269,9 +269,9 @@
       true,
       true,
       true,
+      false,
       true,
-      true,
-      true
+      false
     ]
   ],
   "FUV": [
@@ -287,7 +287,7 @@
     true,
     true,
     true,
-    true,
+    false,
     true,
     true
   ]
