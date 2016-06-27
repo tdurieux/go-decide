@@ -22,28 +22,28 @@ type Parameters struct {
 	RADIUS2 float64
 	LENGTH1 float64
 	LENGTH2 float64
-	DIST float64
+	DIST    float64
 	EPSILON float64
-	QUADS int
-	AREA1 float64
-	AREA2 float64
-	A_PTS int
-	B_PTS int
-	C_PTS int
-	D_PTS int
-	E_PTS int
-	F_PTS int
-	G_PTS int
-	K_PTS int
-	N_PTS int
-	Q_PTS int
+	QUADS   int
+	AREA1   float64
+	AREA2   float64
+	A_PTS   int
+	B_PTS   int
+	C_PTS   int
+	D_PTS   int
+	E_PTS   int
+	F_PTS   int
+	G_PTS   int
+	K_PTS   int
+	N_PTS   int
+	Q_PTS   int
 }
 
 type INPUT struct {
-	NumPoints int `json:"NUMPOINTS"`
-	Points    [][2]float64 `json:"POINTS"`
-	LCM       map[string][NB_LIC]Command `json:"LCM"`
-	PUV       [NB_LIC]bool `json:"PUV"`
+	NumPoints  int `json:"NUMPOINTS"`
+	Points     [][2]float64 `json:"POINTS"`
+	LCM        map[string][NB_LIC]Command `json:"LCM"`
+	PUV        [NB_LIC]bool `json:"PUV"`
 	Parameters Parameters `json:"PARAMETERS"`
 }
 
@@ -52,7 +52,7 @@ type Fuv [NB_LIC]bool
 type Cmv [NB_LIC]bool
 
 type Decide struct {
-	input INPUT
+	input  INPUT
 	Launch string `json:"LAUNCH"`
 	CMV    Cmv `json:"CMV"`
 	PUM    Pum `json:"PUM"`
@@ -130,7 +130,7 @@ func (d *Decide) performFUV() error {
 }
 
 func (d *Decide) performCMV() error {
-	var cmv   Cmv
+	var cmv Cmv
 
 	for i := 0; i < NB_LIC; i++ {
 		decideValue := reflect.ValueOf(d)
@@ -150,7 +150,7 @@ func (d *Decide) performCMV() error {
 
 // There exists at least one set of two consecutive data points
 // that are a distance greater than the length, LENGTH1, apart.
-func (d Decide) Rule0() (bool, error)  {
+func (d Decide) Rule0() (bool, error) {
 	// (0 ≤ LENGTH1)
 	if d.input.Parameters.LENGTH1 < 0 {
 		return false, errors.New("Invalid length1")
@@ -169,7 +169,7 @@ func (d Decide) Rule0() (bool, error)  {
 
 // There exists at least one set of three consecutive data points
 // that cannot all be contained within or on a circle of radius RADIUS1.
-func (d Decide) Rule1() (bool, error)  {
+func (d Decide) Rule1() (bool, error) {
 	// (0 ≤ RADIUS1)
 	if d.input.Parameters.RADIUS1 < 0 {
 		return false, errors.New("Invalid RADIUS1")
@@ -201,7 +201,7 @@ func (d Decide) Rule1() (bool, error)  {
 // The second of the three consecutive points is always the vertex of the angle.
 // If either the first point or the last point (or both) coincides with the vertex,
 // the angle is undefined and the LIC is not satisfied by those three points
-func (d Decide) Rule2() (bool, error)  {
+func (d Decide) Rule2() (bool, error) {
 	// (0 ≤ EPSILON < PI)
 	if d.input.Parameters.EPSILON < 0 || d.input.Parameters.EPSILON >= math.Pi {
 		return false, errors.New("Invalid EPSILON")
@@ -237,7 +237,7 @@ func (d Decide) Rule2() (bool, error)  {
 
 // There exists at least one set of three consecutive data points
 // that are the vertices of a triangle with area greater than AREA1
-func (d Decide) Rule3() (bool, error)  {
+func (d Decide) Rule3() (bool, error) {
 	// (0 ≤ AREA1)
 	if d.input.Parameters.AREA1 < 0 {
 		return false, errors.New("Invalid AREA1")
@@ -249,7 +249,7 @@ func (d Decide) Rule3() (bool, error)  {
 		p2 := d.input.Points[i + 1]
 		p3 := d.input.Points[i + 2]
 
-		area := math.Abs(p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1]))/2
+		area := math.Abs(p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1])) / 2
 		if area > d.input.Parameters.AREA1 {
 			return true, nil
 		}
@@ -264,7 +264,7 @@ func (d Decide) Rule3() (bool, error)  {
 // of decision will be by quadrant number, i.e., I, II, III, IV.
 // For example, the data point (0,0) is in quadrant I, the point (-l,0) is in quadrant II,
 // the point (0,-l) is in quadrant III, the point  (0,1) is in quadrant I and the point (1,0) is in quadrant I.
-func (d Decide) Rule4() (bool, error)  {
+func (d Decide) Rule4() (bool, error) {
 	// (2 ≤ Q PTS ≤ NUMPOINTS)
 	if d.input.Parameters.Q_PTS < 2 || d.input.Parameters.Q_PTS > d.input.NumPoints {
 		return false, errors.New("Invalid Q_PTS")
@@ -273,7 +273,7 @@ func (d Decide) Rule4() (bool, error)  {
 	if d.input.Parameters.QUADS < 1 || d.input.Parameters.QUADS > 3 {
 		return false, errors.New("Invalid QUADS")
 	}
-	for i, _ := range d.input.Points {
+	for i := range d.input.Points {
 		if (i > d.input.NumPoints - d.input.Parameters.Q_PTS) {
 			break;
 		}
@@ -297,7 +297,7 @@ func (d Decide) Rule4() (bool, error)  {
 
 // There exists at least one set of two consecutive data points,
 // (X[i],Y[i]) and (X[j],Y[j]), such that X[j] - X[i] < 0. (where i = j-1)
-func (d Decide) Rule5() (bool, error)  {
+func (d Decide) Rule5() (bool, error) {
 	for i, p1 := range d.input.Points {
 		if (i >= d.input.NumPoints - 1) {
 			break;
@@ -319,7 +319,7 @@ func (d Decide) Rule5() (bool, error)  {
 // then the calculated distance to compare with DIST will be the distance
 // from the coincident point to all other points of the N PTS consecutive points.
 // The condition is not met when NUMPOINTS < 3.
-func (d Decide) Rule6() (bool, error)  {
+func (d Decide) Rule6() (bool, error) {
 	// The condition is not met when NUMPOINTS < 3.
 	if d.input.NumPoints < 3 {
 		return false, nil
@@ -333,10 +333,10 @@ func (d Decide) Rule6() (bool, error)  {
 		return false, errors.New("Invalid DIST.")
 	}
 	for i, p1 := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.N_PTS) {
+		if (i > d.input.NumPoints - d.input.Parameters.N_PTS) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.N_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.N_PTS - 1]
 
 		dp1p2 := computeDistancePointToPoint(p1, p2)
 		if dp1p2 == 0 {
@@ -346,7 +346,7 @@ func (d Decide) Rule6() (bool, error)  {
 				}
 			}
 		} else {
-			for j := i; j < i + d.input.Parameters.N_PTS; j++ {
+			for j := i + 1; j < i + d.input.Parameters.N_PTS - 1; j++ {
 				if (computeDistancePointToLine(d.input.Points[j], computeEquationLine(p1, p2)) > d.input.Parameters.DIST) {
 					return true, nil
 				}
@@ -359,7 +359,7 @@ func (d Decide) Rule6() (bool, error)  {
 // There exists at least one set of two data points separated by exactly K PTS consecutive intervening
 // points that are a distance greater than the length, LENGTH1, apart.
 // The condition is not met when NUMPOINTS < 3.
-func (d Decide) Rule7() (bool, error)  {
+func (d Decide) Rule7() (bool, error) {
 	// The condition is not met when NUMPOINTS < 3.
 	if d.input.NumPoints < 3 {
 		return false, nil
@@ -383,7 +383,7 @@ func (d Decide) Rule7() (bool, error)  {
 // There exists at least one set of three data points separated by exactly A PTS and B PTS
 // consecutive intervening points, respectively, that cannot be contained within or on a circle of
 // radius RADIUS1. The condition is not met when NUMPOINTS < 5.
-func (d Decide) Rule8() (bool, error)  {
+func (d Decide) Rule8() (bool, error) {
 	// The condition is not met when NUMPOINTS < 5.
 	if d.input.NumPoints < 5 {
 		return false, nil
@@ -429,7 +429,7 @@ func (d Decide) Rule8() (bool, error)  {
 // If either the first point or the last point (or both) coincide with the vertex,
 // the angle is undefined and the LIC is not satisfied by those three points.
 // When NUMPOINTS < 5, the condition is not met.
-func (d Decide) Rule9() (bool, error)  {
+func (d Decide) Rule9() (bool, error) {
 	// When NUMPOINTS < 5, the condition is not met.
 	if d.input.NumPoints < 5 {
 		return false, nil
@@ -479,7 +479,7 @@ func (d Decide) Rule9() (bool, error)  {
 // by exactly E PTS and F PTS consecutive intervening points, respectively,
 // that are the vertices of a triangle with area greater than AREA1.
 // The condition is not met when NUMPOINTS < 5.
-func (d Decide) Rule10() (bool, error)  {
+func (d Decide) Rule10() (bool, error) {
 	// The condition is not met when NUMPOINTS < 5.
 	if d.input.NumPoints < 5 {
 		return false, nil
@@ -503,7 +503,7 @@ func (d Decide) Rule10() (bool, error)  {
 		p2 := d.input.Points[i + d.input.Parameters.E_PTS + 1]
 		p3 := d.input.Points[i + d.input.Parameters.E_PTS + d.input.Parameters.F_PTS + 2]
 
-		area := math.Abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p2[1]) + p3[0] * (p1[1] - p2[1]))/2)
+		area := math.Abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p2[1]) + p3[0] * (p1[1] - p2[1])) / 2)
 		if area > d.input.Parameters.AREA1 {
 			return true, nil
 		}
@@ -515,7 +515,7 @@ func (d Decide) Rule10() (bool, error)  {
 // There exists at least one set of two data points, (X[i],Y[i]) and (X[j],Y[j]),
 // separated by exactly G PTS consecutive intervening points, such that X[j] - X[i] < 0 (where i < j ).
 // The condition is not met when NUMPOINTS < 3.
-func (d Decide) Rule11() (bool, error)  {
+func (d Decide) Rule11() (bool, error) {
 	// The condition is not met when NUMPOINTS < 3.
 	if d.input.NumPoints < 3 {
 		return false, nil
@@ -530,21 +530,9 @@ func (d Decide) Rule11() (bool, error)  {
 		}
 		p2 := d.input.Points[i + d.input.Parameters.G_PTS + 1]
 
-		dp1p2 := computeDistancePointToPoint(p1, p2)
-		if (dp1p2 > d.input.Parameters.LENGTH1) {
-			for i, p1 := range d.input.Points {
-				if (i >= d.input.NumPoints - d.input.Parameters.K_PTS) {
-					break;
-				}
-				p2 := d.input.Points[i + d.input.Parameters.K_PTS]
-
-				dp1p2 := computeDistancePointToPoint(p1, p2)
-				if (dp1p2 < d.input.Parameters.LENGTH2) {
-					return true, nil
-				}
-			}
+		if (p2[0] - p1[0] < 0) {
+			return true, nil
 		}
-
 	}
 	return false, nil
 }
@@ -557,7 +545,7 @@ func (d Decide) Rule11() (bool, error)  {
 // that are a distance less than the length, LENGTH2, apart.
 // Both parts must be true for the LIC to be true.
 // The condition is not met when NUMPOINTS < 3.
-func (d Decide) Rule12() (bool, error)  {
+func (d Decide) Rule12() (bool, error) {
 	// The condition is not met when NUMPOINTS < 3.
 	if d.input.NumPoints < 3 {
 		return false, nil
@@ -577,7 +565,7 @@ func (d Decide) Rule12() (bool, error)  {
 		if !cond1 && dp1dp2 > d.input.Parameters.LENGTH1 {
 			cond1 = true
 		}
-		if !cond2 && dp1dp2 > d.input.Parameters.LENGTH2 {
+		if !cond2 && dp1dp2 < d.input.Parameters.LENGTH2 {
 			cond2 = true
 		}
 		if cond1 && cond2 {
@@ -595,7 +583,7 @@ func (d Decide) Rule12() (bool, error)  {
 // that can be contained in or on a circle of radius RADIUS2.
 // Both parts must be true for the LIC to be true.
 // The condition is not met when NUMPOINTS < 5.
-func (d Decide) Rule13() (bool, error)  {
+func (d Decide) Rule13() (bool, error) {
 	// The condition is not met when NUMPOINTS < 5.
 	if d.input.NumPoints < 5 {
 		return false, nil
@@ -621,11 +609,10 @@ func (d Decide) Rule13() (bool, error)  {
 		r1 := computeDistancePointToPoint(p1, pc)
 		r2 := computeDistancePointToPoint(p2, pc)
 		r3 := computeDistancePointToPoint(p3, pc)
-		if (!cond2 && (r1 > d.input.Parameters.RADIUS2 || r2 > d.input.Parameters.RADIUS2 || r3 > d.input.Parameters.RADIUS2)) {
+		if (!cond2 && (r1 > d.input.Parameters.RADIUS1 || r2 > d.input.Parameters.RADIUS1 || r3 > d.input.Parameters.RADIUS1)) {
 			cond2 = true
 		}
-
-		if (!cond1 && (r1 > d.input.Parameters.RADIUS1 || r2 > d.input.Parameters.RADIUS1 || r3 > d.input.Parameters.RADIUS1)) {
+		if (!cond1 && (r1 < d.input.Parameters.RADIUS2 && r2 < d.input.Parameters.RADIUS2 && r3 < d.input.Parameters.RADIUS2)) {
 			cond1 = true
 		}
 		if cond1 && cond2 {
@@ -643,7 +630,7 @@ func (d Decide) Rule13() (bool, error)  {
 // that are the vertices of a triangle with area less than AREA2.
 // Both parts must be true for the LIC to be true.
 // The condition is not met when NUMPOINTS < 5.
-func (d Decide) Rule14() (bool, error)  {
+func (d Decide) Rule14() (bool, error) {
 	// The condition is not met when NUMPOINTS < 5.
 	if d.input.NumPoints < 5 {
 		return false, nil
@@ -661,11 +648,11 @@ func (d Decide) Rule14() (bool, error)  {
 		p2 := d.input.Points[i + d.input.Parameters.E_PTS + 1]
 		p3 := d.input.Points[i + d.input.Parameters.E_PTS + d.input.Parameters.F_PTS + 2]
 
-		area := math.Abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p2[1]) + p3[0] * (p1[1] - p2[1]))/2)
+		area := math.Abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p2[1]) + p3[0] * (p1[1] - p2[1])) / 2)
 		if !cond1 && area > d.input.Parameters.AREA1 {
 			cond1 = true
 		}
-		if !cond2 && area > d.input.Parameters.AREA2{
+		if !cond2 && area < d.input.Parameters.AREA2 {
 			cond2 = true
 		}
 		if cond1 && cond2 {
@@ -675,8 +662,7 @@ func (d Decide) Rule14() (bool, error)  {
 	return false, nil
 }
 
-
-func (d *Decide) isToLaunch()  {
+func (d *Decide) isToLaunch() {
 	for _, v := range d.FUV {
 		if (!v) {
 			d.Launch = "NO"
@@ -686,7 +672,7 @@ func (d *Decide) isToLaunch()  {
 	d.Launch = "YES"
 }
 
-func computeEquationLine(p1 [2]float64, p2 [2]float64) [3]float64  {
+func computeEquationLine(p1 [2]float64, p2 [2]float64) [3]float64 {
 	var equation [3]float64
 
 	equation[0] = p1[1] - p2[1];
@@ -696,11 +682,11 @@ func computeEquationLine(p1 [2]float64, p2 [2]float64) [3]float64  {
 	return equation
 }
 
-func computeDistancePointToLine(p1 [2]float64, equationLine [3]float64) float64  {
+func computeDistancePointToLine(p1 [2]float64, equationLine [3]float64) float64 {
 	return math.Abs(equationLine[0] * p1[0] + equationLine[1] * p1[1] + equationLine[2]) / math.Sqrt(math.Pow(equationLine[0], 2) + math.Pow(equationLine[1], 2));
 }
 
-func computeDistancePointToPoint(p1 [2]float64, p2 [2]float64) float64  {
+func computeDistancePointToPoint(p1 [2]float64, p2 [2]float64) float64 {
 	return math.Sqrt(math.Pow(p1[0] - p2[0], 2) + math.Pow(p1[1] - p2[1], 2))
 }
 
