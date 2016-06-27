@@ -24,11 +24,11 @@ const tpl = `
 		<meta http-equiv="x-ua-compatible" content="ie=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>{{.Title}}</title>
-		<link rel="stylesheet" type="text/css" href="css/style.css">
 		<link rel="stylesheet" href="css/pure-min.css">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
 	</head>
 	<body>
-		<h1>Decision</h1>
+		<h1>Decisions</h1>
 		<table class="summary pure-table">
 			<thead>
 				<tr><th>Input</th><th>is to launch?</th></tr>
@@ -36,10 +36,11 @@ const tpl = `
 			<tbody>{{range .Items}}
 				<tr>
 					<td><a href="{{ .File }}.html">{{ .File }}</a></td>
-					<td>{{ .Decision.Launch }}</td>
+					<td class="{{if eq .Decision.Launch "YES"}}yes{{else}}no{{end}}">{{ .Decision.Launch }}</td>
 				</tr>{{end}}
 			</tbody>
 		</table>
+
 	</body>
 </html>`
 
@@ -51,8 +52,8 @@ const tplDetails = `
 		<meta http-equiv="x-ua-compatible" content="ie=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>{{.Title}}</title>
-		<link rel="stylesheet" type="text/css" href="css/style.css">
 		<link rel="stylesheet" href="css/pure-min.css">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
 	</head>
 	<body>
 		<h1>{{.Title}} - {{ .Item.Decision.Launch }}</h1>
@@ -65,7 +66,7 @@ const tplDetails = `
 			</thead>
 			<tbody>
 				<tr>{{range .Item.Decision.CMV}}
-					<td>{{ . }}</td>{{end}}
+					<td class="{{if .}}yes{{else}}no{{end}}">{{if .}}V{{else}}X{{end}}</td>{{end}}
 				</tr>
 			</tbody>
 		</table>
@@ -78,8 +79,23 @@ const tplDetails = `
 			</thead>
 			<tbody>
 				<tr>{{range .Item.Decision.FUV}}
-					<td>{{ . }}</td>{{end}}
+					<td class="{{if .}}yes{{else}}no{{end}}">{{if .}}V{{else}}X{{end}}</td>{{end}}
 				</tr>
+			</tbody>
+		</table>
+		<h2>PUM</h2>
+		<table class="summary pure-table">
+			<thead>
+				<tr>
+					<th></th>{{range $i, $e := .Item.Decision.PUM}}
+					<th>{{ $i }}</th>{{end}}
+				</tr>
+			</thead>
+			<tbody>{{range $i, $e :=  .Item.Decision.PUM}}
+				<tr>
+					<th>{{ $i }}</th>{{range $e}}
+					<td class="{{if .}}yes{{else}}no{{end}}">{{if .}}V{{else}}X{{end}}</td>{{end}}
+				</tr>{{end}}
 			</tbody>
 		</table>
 	</body>

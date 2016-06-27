@@ -369,10 +369,10 @@ func (d Decide) Rule7() (bool, error)  {
 		return false, errors.New("Invalid K_PTS.")
 	}
 	for i, p1 := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.K_PTS) {
+		if (i >= d.input.NumPoints - d.input.Parameters.K_PTS - 1) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.K_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.K_PTS + 1]
 		if computeDistancePointToPoint(p1, p2) > d.input.Parameters.LENGTH1 {
 			return true, nil
 		}
@@ -401,11 +401,11 @@ func (d Decide) Rule8() (bool, error)  {
 		return false, errors.New("Invalid B_PTS.")
 	}
 	for i, p1 := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.A_PTS - d.input.Parameters.B_PTS) {
+		if (i >= d.input.NumPoints - d.input.Parameters.A_PTS - d.input.Parameters.B_PTS - 2) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.A_PTS]
-		p3 := d.input.Points[i + d.input.Parameters.A_PTS + d.input.Parameters.B_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.A_PTS + 1]
+		p3 := d.input.Points[i + d.input.Parameters.A_PTS + d.input.Parameters.B_PTS + 2]
 
 		// center of the 3 points
 		var pc [2]float64
@@ -422,28 +422,36 @@ func (d Decide) Rule8() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of three data points separated
+// by exactly C PTS and D PTS  consecutive intervening points, respectively,
+// that form an angle such that: angle < (PI−EPSILON) or angle > (PI+EPSILON)
+// The second point of the set of three points is always the vertex of the angle.
+// If either the first point or the last point (or both) coincide with the vertex,
+// the angle is undefined and the LIC is not satisfied by those three points.
+// When NUMPOINTS < 5, the condition is not met.
 func (d Decide) Rule9() (bool, error)  {
+	// When NUMPOINTS < 5, the condition is not met.
 	if d.input.NumPoints < 5 {
 		return false, nil
 	}
+	// 1 ≤ C PTS
 	if d.input.Parameters.C_PTS < 1 {
 		return false, errors.New("Invalid C_PTS.")
 	}
+	// 1 ≤ D PTS
 	if d.input.Parameters.D_PTS < 1 {
 		return false, errors.New("Invalid D_PTS.")
 	}
+	// C PTS+D PTS ≤ NUMPOINTS−3
 	if d.input.Parameters.C_PTS + d.input.Parameters.D_PTS > d.input.NumPoints - 3 {
 		return false, nil
 	}
-	if d.input.Parameters.EPSILON < 0 || d.input.Parameters.EPSILON >= math.Pi {
-		return false, errors.New("Invalid EPSILON")
-	}
 	for i, a := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.C_PTS - d.input.Parameters.D_PTS) {
+		if (i >= d.input.NumPoints - d.input.Parameters.C_PTS - d.input.Parameters.D_PTS - 2) {
 			break;
 		}
-		b := d.input.Points[i + d.input.Parameters.C_PTS]
-		c := d.input.Points[i + d.input.Parameters.C_PTS + d.input.Parameters.D_PTS]
+		b := d.input.Points[i + d.input.Parameters.C_PTS + 1]
+		c := d.input.Points[i + d.input.Parameters.C_PTS + d.input.Parameters.D_PTS + 2]
 
 		// http://stackoverflow.com/questions/3486172/angle-between-3-points
 		ab := [2]float64{b[0] - a[0], b[1] - a[1]}
@@ -467,22 +475,33 @@ func (d Decide) Rule9() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of three data points separated
+// by exactly E PTS and F PTS consecutive intervening points, respectively,
+// that are the vertices of a triangle with area greater than AREA1.
+// The condition is not met when NUMPOINTS < 5.
 func (d Decide) Rule10() (bool, error)  {
+	// The condition is not met when NUMPOINTS < 5.
+	if d.input.NumPoints < 5 {
+		return false, nil
+	}
+	// 1 ≤ E PTS
 	if d.input.Parameters.E_PTS < 1 {
 		return false, errors.New("Invalid E_PTS.")
 	}
+	// 1 ≤ F PTS
 	if d.input.Parameters.F_PTS < 1 {
 		return false, errors.New("Invalid F_PTS.")
 	}
-	if d.input.Parameters.AREA1 < 0 {
-		return false, errors.New("Invalid AREA1")
+	// E PTS+F PTS ≤ NUMPOINTS−3
+	if d.input.Parameters.E_PTS + d.input.Parameters.F_PTS > d.input.NumPoints - 3 {
+		return false, nil
 	}
 	for i, p1 := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.E_PTS - d.input.Parameters.F_PTS) {
+		if (i >= d.input.NumPoints - d.input.Parameters.E_PTS - d.input.Parameters.F_PTS - 2) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.E_PTS]
-		p3 := d.input.Points[i + d.input.Parameters.E_PTS + d.input.Parameters.F_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.E_PTS + 1]
+		p3 := d.input.Points[i + d.input.Parameters.E_PTS + d.input.Parameters.F_PTS + 2]
 
 		area := math.Abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p2[1]) + p3[0] * (p1[1] - p2[1]))/2)
 		if area > d.input.Parameters.AREA1 {
@@ -493,21 +512,23 @@ func (d Decide) Rule10() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of two data points, (X[i],Y[i]) and (X[j],Y[j]),
+// separated by exactly G PTS consecutive intervening points, such that X[j] - X[i] < 0 (where i < j ).
+// The condition is not met when NUMPOINTS < 3.
 func (d Decide) Rule11() (bool, error)  {
+	// The condition is not met when NUMPOINTS < 3.
 	if d.input.NumPoints < 3 {
 		return false, nil
 	}
-	if d.input.Parameters.K_PTS < 1 {
-		return false, errors.New("Invalid K_PTS.")
-	}
-	if d.input.Parameters.LENGTH2 < 0 {
-		return false, errors.New("Invalid LENGTH2")
+	// 1 ≤ G PTS ≤ NUMPOINTS−2
+	if d.input.Parameters.G_PTS > d.input.NumPoints - 2 {
+		return false, nil
 	}
 	for i, p1 := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.K_PTS) {
+		if (i >= d.input.NumPoints - d.input.Parameters.G_PTS - 1) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.K_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.G_PTS + 1]
 
 		dp1p2 := computeDistancePointToPoint(p1, p2)
 		if (dp1p2 > d.input.Parameters.LENGTH1) {
@@ -528,17 +549,30 @@ func (d Decide) Rule11() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of two data points, separated by exactly K PTS consecutive
+// intervening points, which are a distance greater than the length, LENGTH1, apart.
+// In addition, there exists at least one set of two data points
+// (which can be the same or different from the two data points just mentioned),
+// separated by exactly K PTS consecutive intervening points,
+// that are a distance less than the length, LENGTH2, apart.
+// Both parts must be true for the LIC to be true.
+// The condition is not met when NUMPOINTS < 3.
 func (d Decide) Rule12() (bool, error)  {
-	if d.input.Parameters.K_PTS < 1 {
-		return false, errors.New("Invalid K_PTS.")
+	// The condition is not met when NUMPOINTS < 3.
+	if d.input.NumPoints < 3 {
+		return false, nil
+	}
+	// 0 ≤ LENGTH2
+	if d.input.Parameters.LENGTH2 < 0 {
+		return false, errors.New("Invalid LENGTH2.")
 	}
 	cond1 := false
 	cond2 := false
 	for i, p1 := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.K_PTS) {
+		if (i >= d.input.NumPoints - d.input.Parameters.K_PTS - 1) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.K_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.K_PTS + 1]
 		dp1dp2 := computeDistancePointToPoint(p1, p2)
 		if !cond1 && dp1dp2 > d.input.Parameters.LENGTH1 {
 			cond1 = true
@@ -553,21 +587,31 @@ func (d Decide) Rule12() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of three data points, separated by exactly A PTS and B PTS
+// consecutive intervening points, respectively, that cannot be contained within or on a circle of radius RADIUS1.
+// In addition, there exists at least one set of three data points
+// (which can be the same or different from the three data points just mentioned)
+// separated by exactly A PTS and B PTS consecutive intervening points, respectively,
+// that can be contained in or on a circle of radius RADIUS2.
+// Both parts must be true for the LIC to be true.
+// The condition is not met when NUMPOINTS < 5.
 func (d Decide) Rule13() (bool, error)  {
-	if d.input.Parameters.A_PTS < 1 {
-		return false, errors.New("Invalid A_PTS.")
+	// The condition is not met when NUMPOINTS < 5.
+	if d.input.NumPoints < 5 {
+		return false, nil
 	}
-	if d.input.Parameters.B_PTS < 1 {
-		return false, errors.New("Invalid B_PTS.")
+	// 0 ≤ RADIUS2
+	if d.input.Parameters.RADIUS2 < 0 {
+		return false, errors.New("Invalid RADIUS2.")
 	}
 	cond1 := false
 	cond2 := false
 	for i, p1 := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.A_PTS - d.input.Parameters.B_PTS) {
+		if (i >= d.input.NumPoints - d.input.Parameters.A_PTS - d.input.Parameters.B_PTS - 2) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.A_PTS]
-		p3 := d.input.Points[i + d.input.Parameters.A_PTS + d.input.Parameters.B_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.A_PTS + 1]
+		p3 := d.input.Points[i + d.input.Parameters.A_PTS + d.input.Parameters.B_PTS + 2]
 
 		// center of the 3 points
 		var pc [2]float64
@@ -592,21 +636,30 @@ func (d Decide) Rule13() (bool, error)  {
 	return false, nil
 }
 
+// There exists at least one set of three data points, separated by exactly E PTS and F PTS consecutive
+// intervening points, respectively, that are the vertices of a triangle with area greater than AREA1.
+// In addition, there exist three data points (which can be the same or different from the three data points just mentioned)
+// separated by exactly E PTS and F PTS consecutive intervening points, respectively,
+// that are the vertices of a triangle with area less than AREA2.
+// Both parts must be true for the LIC to be true.
+// The condition is not met when NUMPOINTS < 5.
 func (d Decide) Rule14() (bool, error)  {
-	if d.input.Parameters.E_PTS < 1 {
-		return false, errors.New("Invalid E_PTS.")
+	// The condition is not met when NUMPOINTS < 5.
+	if d.input.NumPoints < 5 {
+		return false, nil
 	}
-	if d.input.Parameters.F_PTS < 1 {
-		return false, errors.New("Invalid F_PTS.")
+	// 0 ≤ AREA2
+	if d.input.Parameters.AREA2 < 0 {
+		return false, errors.New("Invalid AREA2.")
 	}
 	cond1 := false
 	cond2 := false
 	for i, p1 := range d.input.Points {
-		if (i >= d.input.NumPoints - d.input.Parameters.E_PTS - d.input.Parameters.F_PTS) {
+		if (i >= d.input.NumPoints - d.input.Parameters.E_PTS - d.input.Parameters.F_PTS - 2) {
 			break;
 		}
-		p2 := d.input.Points[i + d.input.Parameters.E_PTS]
-		p3 := d.input.Points[i + d.input.Parameters.E_PTS + d.input.Parameters.F_PTS]
+		p2 := d.input.Points[i + d.input.Parameters.E_PTS + 1]
+		p3 := d.input.Points[i + d.input.Parameters.E_PTS + d.input.Parameters.F_PTS + 2]
 
 		area := math.Abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p2[1]) + p3[0] * (p1[1] - p2[1]))/2)
 		if !cond1 && area > d.input.Parameters.AREA1 {
