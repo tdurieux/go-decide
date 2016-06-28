@@ -5,6 +5,48 @@ import (
 	"math"
 )
 
+func TestDecide_Decide(t *testing.T) {
+	decide := Decide{}
+	err := decide.Decide(INPUT{})
+	if err == nil {
+		t.Error("Invalid input expected")
+		return
+	}
+
+	points := make([][2]float64, 5)
+	input := INPUT{}
+	input.NumPoints = 5
+	input.Parameters.AREA1 = 1
+	input.Parameters.AREA2 = 1
+	input.Parameters.A_PTS = 1
+	input.Parameters.B_PTS = 1
+	input.Parameters.C_PTS = 1
+	input.Parameters.D_PTS = 1
+	input.Parameters.E_PTS = 1
+	input.Parameters.F_PTS = 1
+	input.Parameters.G_PTS = 1
+	input.Parameters.K_PTS = 1
+	input.Parameters.Q_PTS = 2
+	input.Parameters.N_PTS = 3
+	input.Parameters.QUADS = 1
+	points[0] = [2]float64{5, 0}
+	points[1] = [2]float64{0, 2}
+	points[2] = [2]float64{0, 0}
+	input.Points = points
+	err = decide.Decide(input)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	input.Parameters.N_PTS = 2
+	err = decide.Decide(input)
+	if err == nil {
+		t.Error("Invalid N_PTS expected")
+		return
+	}
+
+}
 func TestRule0(t *testing.T) {
 	decide := Decide{}
 	points := make([][2]float64, 2)

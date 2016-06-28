@@ -73,21 +73,15 @@ func (d *Decide) Decide(input INPUT) error {
 		return err
 	}
 
-	err = d.performPUM()
-	if err != nil {
-		return err
-	}
+	d.performPUM()
+	d.performFUV()
 
-	err = d.performFUV()
-	if err != nil {
-		return err
-	}
 	d.isToLaunch()
 
 	return nil
 }
 
-func (d *Decide) performPUM() error {
+func (d *Decide) performPUM() {
 	for i := 0; i < NB_LIC; i++ {
 		cmvi := d.CMV[i]
 		for j := 0; j < NB_LIC; j++ {
@@ -108,10 +102,9 @@ func (d *Decide) performPUM() error {
 
 		}
 	}
-	return nil
 }
 
-func (d *Decide) performFUV() error {
+func (d *Decide) performFUV() {
 	for i := 0; i < NB_LIC; i++ {
 		if !d.input.PUV[i] {
 			d.FUV[i] = true
@@ -126,7 +119,6 @@ func (d *Decide) performFUV() error {
 		}
 		d.FUV[i] = fuv
 	}
-	return nil
 }
 
 func (d *Decide) performCMV() error {
