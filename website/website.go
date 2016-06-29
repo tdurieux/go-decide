@@ -169,6 +169,7 @@ func getResults(outputDir string) Results {
 	if (err != nil) {
 		log.Fatal(err)
 	}
+	nbValid := make([]int, 9)
 	for k, v := range results {
 		newValue := make([]string, len(v) + 1)
 		refVal := v[0]
@@ -187,6 +188,7 @@ func getResults(outputDir string) Results {
 
 		if isEquals {
 			delete(results, k)
+			newValue[1] = refVal
 		} else {
 			if (countYes > (len(v) - 1)/ 2) {
 				newValue[1] = "yes"
@@ -197,7 +199,17 @@ func getResults(outputDir string) Results {
 			}
 			results[k] = newValue
 		}
+		for i := 0; i < len(newValue); i++ {
+			if newValue[i] == refVal {
+				nbValid[i] ++
+			}
+		}
 	}
+	correct := make([]string, 9)
+	for i, _ := range correct {
+		correct[i] = fmt.Sprintf("%d", nbValid[i])
+	}
+	results["Nb correct"] = correct
 	return results;
 }
 
