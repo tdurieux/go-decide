@@ -639,8 +639,7 @@ func (d Decide) Rule14() (bool, error) {
 		}
 		p2 := d.input.Points[i + d.input.Parameters.E_PTS + 1]
 		p3 := d.input.Points[i + d.input.Parameters.E_PTS + d.input.Parameters.F_PTS + 2]
-
-		area := math.Abs((p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p2[1]) + p3[0] * (p1[1] - p2[1])) / 2)
+		area := math.Abs(p1[0] * (p2[1] - p3[1]) + p2[0] * (p3[1] - p1[1]) + p3[0] * (p1[1] - p2[1])) / 2
 		if !cond1 && area > d.input.Parameters.AREA1 {
 			cond1 = true
 		}
